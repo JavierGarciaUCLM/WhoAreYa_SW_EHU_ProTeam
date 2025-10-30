@@ -35,22 +35,6 @@ Perfecto para viciarte tú solo, picarte con tus amigos o dejarlo montado en Twi
 
 Escribe el nombre de un futbolista (p. ej. “Kevin De Bruyne”).
 
-El juego te devuelve una tabla con atributos como:
-
-Liga
-
-Club
-
-Nacionalidad
-
-Posición
-
-Edad / Año de nacimiento
-
-Dorsal (si lo usas)
-
-Cada atributo se marca:
-
 🟩 Correcto → coincide con el jugador secreto.
 
 🟨 Casi → por ejemplo, misma liga pero club distinto, o posición cercana (MC vs MCD).
