@@ -2,7 +2,22 @@ import { folder, leftArrow } from "./fragments.js";
 import { fetchJSON } from "./loaders.js";
 
 function differenceInDays(date1) {
-    // YOUR CODE HERE
+  //YOUR CODE HERE
+  const start = new Date(
+    date1.getFullYear(),
+    date1.getMonth(),
+    date1.getDate()
+  );
+  const today = new Date();
+  const end = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  ); //normalizado de fechas y toma de día
+
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+  const diffMs = end - start;
+  return Math.floor(diffMs / MS_PER_DAY) + 1; //suma de 1 día como pide el enunciado
 }
 
 let difference_In_Days = differenceInDays(new Date("01-10-2025"));
@@ -21,7 +36,12 @@ let game = {
 
 function getSolution(players, solutionArray, difference_In_Days) {
     // YOUR CODE HERE 
+  const index = (difference_In_Days - 1) % solutionArray.length;//búsqueda circular del array de soluciones
+  const solutionId = solutionArray[index];//ID jugador top secret
+  const player = players.find(p => p.id === solutionId);//pillamos el jugador completo
+  return player;
 }
+
 
 Promise.all([fetchJSON("fullplayers25"), fetchJSON("solution25")]).then(
   (values) => {
