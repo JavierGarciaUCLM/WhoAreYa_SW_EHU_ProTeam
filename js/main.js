@@ -47,32 +47,36 @@ function getSolution(players, solutionArray, difference_In_Days) {
 Promise.all([fetchJSON("fullplayers25"), fetchJSON("solution25")]).then(
   (values) => {
 
-    let solution;
-    
-    [game.players, solution] = values;
+    let solutionRaw;
+    [game.players, solutionRaw] = values;
 
-    game.solution = getSolution(game.players, solution, difference_In_Days);
-    
-    console.log(game.solution);
+    //solution25.json es un array de strings, se pasamos a números
+    const solutionArray = solutionRaw.map(id => Number(id));
 
-    document.getElementById("mistery").src = `https://playfootball.games/media/players/${game.solution.id % 32}/${game.solution.id}.png`;
+    game.solution = getSolution(game.players, solutionArray, difference_In_Days);
 
+    console.log("Jugador misterioso:", game.solution);
 
-      // YOUR CODE HERE
-    let addRow = setupRows(game); //estado del juego
-    // get myInput object...
-    const input = document.getElementById("guess"); 
-      // when the user types a number an press the Enter key:
-      input.addEventListener("keyup", (e) => {
-        if (e.key === "Enter") {
-          const playerId = parseInt(input.value, 10);
-          if (!isNaN(playerId)) {
-        addRow( playerId/* the ID of the player, where is it? */);
-        input.value = "";
-    //  
-  }
-}
-});
+    if (!game.solution) {
+      console.error("No se ha encontrado ningún jugador con ese ID");
+      return;
+    }
+
+    document.getElementById("mistery").src =
+      `https://playfootball.games/media/players/${game.solution.id % 32}/${game.solution.id}.png`;
+
+    let addRow = setupRows(game);
+
+    const input = document.getElementById("myInput");
+    input.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        const playerId = parseInt(input.value, 10);
+        if (!isNaN(playerId)) {
+          addRow(playerId);
+          input.value = "";
+        }
+      }
+    });
 
   }
 );
