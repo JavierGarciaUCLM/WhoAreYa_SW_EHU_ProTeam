@@ -1,5 +1,6 @@
 import { folder, leftArrow } from "./fragments.js";
 import { fetchJSON } from "./loaders.js";
+import { setupRows } from "./rows.js";
 
 function differenceInDays(date1) {
   //YOUR CODE HERE
@@ -58,12 +59,20 @@ Promise.all([fetchJSON("fullplayers25"), fetchJSON("solution25")]).then(
 
 
       // YOUR CODE HERE
-    let addRow = setupRows( /* THIS NEEDS A PARAMETER */ );
+    let addRow = setupRows(game); //estado del juego
     // get myInput object...
+    const input = document.getElementById("guess"); 
       // when the user types a number an press the Enter key:
-        addRow( /* the ID of the player, where is it? */);
+      input.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+          const playerId = parseInt(input.value, 10);
+          if (!isNaN(playerId)) {
+        addRow( playerId/* the ID of the player, where is it? */);
+        input.value = "";
     //  
-
+  }
+}
+});
 
   }
 );
