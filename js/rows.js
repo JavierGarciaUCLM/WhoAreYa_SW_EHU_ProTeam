@@ -1,5 +1,6 @@
 // YOUR CODE HERE :  
 import { stringToHTML } from "./fragments.js";
+import { initState } from "./stats.js";
 export { setupRows };
 // .... initState ....
 //
@@ -13,18 +14,12 @@ function pad(a, b){
 const delay = 350;
 const attribs = ['nationality', 'leagueId', 'teamId', 'position', 'birthdate']
 
-function initState(storageKey, solutionId) { //milestones futuros, pero necesario ahora
-    const state = { key: storageKey, solutionId, guesses: [] };
-    function updateState(guessId) {
-      state.guesses.push(guessId);
-    }
-    return [state, updateState];
-  }
 
 let setupRows = function (game) {
 
 
     let [state, updateState] = initState('WAYgameState', game.solution.id)
+    game.guesses = state.guesses.slice();//sync
 
 
     function leagueToFlag(leagueId) {
@@ -141,6 +136,13 @@ let setupRows = function (game) {
 
     function resetInput(){
         // YOUR CODE HERE
+
+    const input = document.getElementById("myInput");
+    if (!input) return;
+    let attempt = game.guesses.length + 1;//intentos +1
+    if (attempt > 8) attempt = 8;//limitao a 8
+    input.value = "";
+    input.placeholder = `Intento ${attempt} de 8`;
     }
 
     let getPlayer = function (playerId) {
@@ -151,7 +153,10 @@ let setupRows = function (game) {
 
     function gameEnded(lastGuess){
         // YOUR CODE HERE
-        return false; //pa el milestone4, pero por ahora así que peta
+    const hasGuessed = lastGuess === game.solution.id;
+    const outOfTries = game.guesses.length >= 8;   //ya hay 8 intentos???
+
+    return hasGuessed || outOfTries;
     }
 
 
@@ -169,24 +174,32 @@ let setupRows = function (game) {
 
         resetInput();
 
-         if (gameEnded(playerId)) {
+        if (gameEnded(playerId)) {
             // updateStats(game.guesses.length);
-
+        
+            const input = document.getElementById("myInput");//no lo piden, pero habrá que parar el input??
+            if (input) {
+                input.disabled = true;
+            }
+        
             if (playerId == game.solution.id) {
                 success();
-            }
-
-            if (game.guesses.length == 8) {
+            } else if (game.guesses.length == 8) {
                 gameOver();
             }
-
-
-                  let interval = 0 ;
-
-
-         }
+        
+            let interval = 0;
+        }
 
 
         showContent(content, guess)
+    }
+
+    function success() {
+        unblur('success');
+    }
+    
+    function gameOver() {
+        unblur('fail');
     }
 }
