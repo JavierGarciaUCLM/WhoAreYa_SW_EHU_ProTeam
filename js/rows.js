@@ -1,6 +1,6 @@
 // YOUR CODE HERE :  
-// .... stringToHTML ....
-// .... setupRows .....
+import { stringToHTML } from "./fragments.js";
+export { setupRows };
 // .... initState ....
 //
 
@@ -21,17 +21,43 @@ let setupRows = function (game) {
 
 
     function leagueToFlag(leagueId) {
-        // YOUR CODE HERE
+        //YOUR CODE HERE
+        const leagueMap = {
+            564: "es1",//la de ESPAÑA
+            8:   "en1",//la de inglaterra
+            82:  "de1",//la de alemania
+            384: "it1",//la de italia
+            301: "fr1"//la de francia
+        };
+    
+        return leagueMap[leagueId] ?? "unknown"; //usado en <img src="https://playfootball.games/media/competitions/${leagueToFlag(guess.leagueId)}.png"
     }
 
 
     function getAge(dateString) {
-        // YOUR CODE HERE
+        //YOUR CODE HERE
+        const birth = new Date(dateString);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const hasBirthdayPassed = today.getMonth() > birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate()); //si el mes actual ha pasado del cumple o si el mes es el mismo y el dia es mayor o igual, se resta 1 a la edad
+        if (!hasBirthdayPassed) age--;
+        return age; //usado en ${getAge(guess.birthdate)}
     }
     
     let check = function (theKey, theValue) {
             // YOUR CODE HERE
-    }
+            const target = game.solution; //jugador solución
+            if (theKey === "birthdate") {
+                const guessedAge = getAge(theValue);
+                const targetAge  = getAge(target.birthdate);
+                if (guessedAge === targetAge) return "correct";
+                // Si el jugador que hemos puesto es más joven que el misterioso necesitamos "higher" (mayor edad)
+                return guessedAge < targetAge ? "higher" : "lower";
+            }
+        
+            //Vemos el resto de opciones
+            return target[theKey] === theValue ? "correct" : "incorrect"; //usado aquí ${check(attribs[j], guess[attribs[j]]) == 'correct' ? 'bg-green-500' : ''}
+        };
 
         function unblur(outcome) {
         return new Promise( (resolve, reject) =>  {
@@ -112,6 +138,7 @@ let setupRows = function (game) {
 
     let getPlayer = function (playerId) {
             // YOUR CODE HERE   
+            return game.players.find(p => p.id === playerId);
     }
 
 
