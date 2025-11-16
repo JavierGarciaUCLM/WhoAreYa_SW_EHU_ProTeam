@@ -3,3 +3,8 @@ export const leftArrow = `<svg xmlns="http://www.w3.org/2000/svg" fill="white" v
 
 // YOUR CODE HERE export stringToHTML . Consider to use a single export command instead of one for each const/function
 //
+export function stringToHTML(str) {
+    const template = document.createElement("template");
+    template.innerHTML = str.trim();
+    return template.content.firstElementChild;
+  }

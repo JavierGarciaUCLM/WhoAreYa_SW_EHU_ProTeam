@@ -138,12 +138,13 @@ let setupRows = function (game) {
 
     let getPlayer = function (playerId) {
             // YOUR CODE HERE   
-            return game.players.find(p => p.id === playerId);
+        return game.players.find(p => p.id === playerId);
     }
 
 
     function gameEnded(lastGuess){
         // YOUR CODE HERE
+        return false; //pa el milestone4, pero por ahora así que peta
     }
 
 
@@ -173,7 +174,7 @@ let setupRows = function (game) {
             }
 
 
-                  let interval = /* YOUR CODE HERE */ ;
+                  let interval = 0 ;
 
 
          }
