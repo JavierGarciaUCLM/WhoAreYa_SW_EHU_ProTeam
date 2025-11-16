@@ -13,6 +13,13 @@ function pad(a, b){
 const delay = 350;
 const attribs = ['nationality', 'leagueId', 'teamId', 'position', 'birthdate']
 
+function initState(storageKey, solutionId) { //milestones futuros, pero necesario ahora
+    const state = { key: storageKey, solutionId, guesses: [] };
+    function updateState(guessId) {
+      state.guesses.push(guessId);
+    }
+    return [state, updateState];
+  }
 
 let setupRows = function (game) {
 
