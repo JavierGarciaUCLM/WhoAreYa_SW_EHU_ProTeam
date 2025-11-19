@@ -22,7 +22,7 @@ export function autocomplete(inp, game) {
 
         for (i = 0; i < players.length; i++) {
             // comprobamos si el nombre coincide (usando match/parse si están disponibles)
-            const matches = (window.WAY && typeof window.WAY.match === 'function') ? window.WAY.match(players[i].name, val, { insideWords: true }) : [];
+            const matches = (window.WAY && typeof window.WAY.match === 'function') ? window.WAY.match(players[i].name, val, { insideWords: true, findAllOccurrences: true }) : [];
             if (matches && matches.length > 0) {
                 const parsed = (window.WAY && typeof window.WAY.parse === 'function') ? window.WAY.parse(players[i].name, matches) : [{ text: players[i].name, highlight: false }];
 
