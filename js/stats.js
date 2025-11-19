@@ -1,6 +1,5 @@
 export {updateStats, getStats, initState}
 
-
 let initState = function(what, solutionId) { 
 
     // YOUR CODE HERE
@@ -45,4 +44,6 @@ function updateStats(t){
 
 
 let gamestats = getStats('gameStats');
+
+
 

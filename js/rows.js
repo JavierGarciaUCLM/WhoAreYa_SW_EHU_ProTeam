@@ -1,14 +1,12 @@
-// YOUR CODE HERE :  
 import { stringToHTML } from "./fragments.js";
 import { initState } from "./stats.js";
 export { setupRows };
-// .... initState ....
-//
 
 // From: https://stackoverflow.com/a/7254108/243532
 function pad(a, b){
     return(1e15 + a + '').slice(-b);
 }
+
 
 
 const delay = 350;

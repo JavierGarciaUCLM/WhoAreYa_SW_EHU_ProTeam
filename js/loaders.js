@@ -1,5 +1,3 @@
-export { fetchJSON };
-
 async function fetchJSON(what) {
     //YOUR CODE HERE
     const url = `./json/${what}.json`; //./json/fullplayers25.json, ./json/solution25.json
@@ -10,3 +8,4 @@ async function fetchJSON(what) {
     const data = await res.json();
   return data;
 }
+export { fetchJSON };
