@@ -14,13 +14,12 @@ let initState = function(what, solutionId) {
         }
     }
 
-    if (!state || typeof state !== "object" || state.solution !== solutionId) {
+    if (!state || typeof state !== "object" || state.solution !== solutionId) { //sino había, lo creoo
         state = {
             guesses: [],
             solution: solutionId
         };
     }
-
     let updateState = function (guessId) {
         state.guesses.push(guessId);
         localStorage.setItem(what, JSON.stringify(state));
