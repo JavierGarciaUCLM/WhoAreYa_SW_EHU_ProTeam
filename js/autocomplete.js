@@ -1,8 +1,6 @@
 import { setupRows } from "./rows.js";
 
-export { autocomplete }
-
-function autocomplete(inp, game) {
+export function autocomplete(inp, game) {
 
     let addRow = setupRows(game);
 
@@ -23,20 +21,21 @@ function autocomplete(inp, game) {
         this.parentNode.appendChild(a);
 
         for (i = 0; i < players.length; i++) {
-            // comprobamos si el nombre empieza por lo que ha escrito el usuario (case-insensitive)
-            if (players[i].name.toUpperCase().startsWith(val.toUpperCase())) {
+            // comprobamos si el nombre coincide (usando match/parse si están disponibles)
+            const matches = (window.WAY && typeof window.WAY.match === 'function') ? window.WAY.match(players[i].name, val, { insideWords: true, findAllOccurrences: true }) : [];
+            if (matches && matches.length > 0) {
+                const parsed = (window.WAY && typeof window.WAY.parse === 'function') ? window.WAY.parse(players[i].name, matches) : [{ text: players[i].name, highlight: false }];
 
                 b = document.createElement("DIV");
                 b.classList.add('flex', 'items-start', 'gap-x-3', 'leading-tight', 'uppercase', 'text-sm');
 
                 b.innerHTML = `<img src="https://cdn.sportmonks.com/images/soccer/teams/${players[i].teamId % 32}/${players[i].teamId}.png"  width="28" height="28">`;
 
-                // resaltamos las letras coincidentes en negrita y mostramos el resto del nombre
+                // construimos el nombre resaltado a partir de parsed
+                const nameHtml = parsed.map(p => p.highlight ? `<span class='font-bold'>${p.text}</span>` : `<span>${p.text}</span>`).join('');
 
-
-                b.innerHTML += `<div class='self-center'>
-                                    <span class='font-bold'>${players[i].name.substr(0,val.length)}</span><span>${players[i].name.substr(val.length)}</span>
-                                    <input type='hidden' name='name' value='${name}'>
+                b.innerHTML += `<div class='self-center'>${nameHtml}
+                                    <input type='hidden' name='name' value='${players[i].name}'>
                                     <input type='hidden' name='id' value='${players[i].id}'>
                                 </div>`;
 
