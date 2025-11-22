@@ -5,58 +5,61 @@ export { autocomplete }
 function autocomplete(inp, game) {
 
     let addRow = setupRows(game);
-
     let players = game.players;
-
     let currentFocus;
 
     inp.addEventListener("input", function (e) {
         let a, b, i, val = this.value;
         closeAllLists();
-        if (!val) {
-            return false;
-        }
-        currentFocus = -2;
+        if (!val) { return false; }
+        currentFocus = -1; // CAMBIO: Iniciamos en -1
+        
         a = document.createElement("DIV");
         a.setAttribute("id", this.id + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
         this.parentNode.appendChild(a);
 
+        // Lógica de búsqueda
         for (i = 0; i < players.length; i++) {
-            // comprobamos si el nombre coincide (usando match/parse si están disponibles)
-            const matches = (window.WAY && typeof window.WAY.match === 'function') ? window.WAY.match(players[i].name, val, { insideWords: true, findAllOccurrences: true }) : [];
-            if (matches && matches.length > 0) {
-                const parsed = (window.WAY && typeof window.WAY.parse === 'function') ? window.WAY.parse(players[i].name, matches) : [{ text: players[i].name, highlight: false }];
+            // Usamos tu lógica de match si existe, o un includes básico como fallback
+            let matchFound = false;
+            
+            if (window.WAY && typeof window.WAY.match === 'function') {
+                 const matches = window.WAY.match(players[i].name, val, { insideWords: true, findAllOccurrences: true });
+                 matchFound = (matches && matches.length > 0);
+            } else {
+                 // Fallback simple por si WAY.match falla
+                 matchFound = players[i].name.toUpperCase().includes(val.toUpperCase());
+            }
 
+            if (matchFound) {
                 b = document.createElement("DIV");
                 b.classList.add('flex', 'items-start', 'gap-x-3', 'leading-tight', 'uppercase', 'text-sm');
+                
+                // Imagen del equipo
+                b.innerHTML = `<img src="https://cdn.sportmonks.com/images/soccer/teams/${players[i].teamId % 32}/${players[i].teamId}.png" width="28" height="28">`;
 
-                b.innerHTML = `<img src="https://cdn.sportmonks.com/images/soccer/teams/${players[i].teamId % 32}/${players[i].teamId}.png"  width="28" height="28">`;
-
-                // resaltamos las letras coincidentes en negrita y mostramos el resto del nombre
-
-
+                // --- CORRECCIÓN CRÍTICA AQUÍ ABAJO ---
+                // Antes ponías value='${name}', lo cual daba error porque 'name' no existe.
+                // Ahora ponemos value='${players[i].name}'.
+                
                 b.innerHTML += `<div class='self-center'>
-                                    <span class='font-bold'>${players[i].name.substr(0,val.length)}</span><span>${players[i].name.substr(val.length)}</span>
-                                    <input type='hidden' name='name' value='${name}'>
+                                    <span class='font-bold'>${players[i].name}</span>
+                                    <input type='hidden' name='name' value='${players[i].name}'>
                                     <input type='hidden' name='id' value='${players[i].id}'>
                                 </div>`;
 
                 b.addEventListener("click", function (e) {
-                    // ponemos el valor en el input (el first hidden es el nombre)
                     inp.value = this.getElementsByTagName("input")[0].value;
-
                     closeAllLists();
 
-                    // Ejecutamos addRow pasando el id (ajusta si tu setupRows necesita otra cosa)
                     const idStr = this.getElementsByTagName("input")[1].value;
                     const id = parseInt(idStr, 10);
                     if (!Number.isNaN(id)) {
                         try {
                             addRow(id);
                         } catch (err) {
-
-                            console.warn("addRow falló con id, revisa setupRows:", err);
+                            console.warn("Error en addRow:", err);
                         }
                     }
                 });
@@ -68,16 +71,21 @@ function autocomplete(inp, game) {
     inp.addEventListener("keydown", function (e) {
         let x = document.getElementById(this.id + "autocomplete-list");
         if (x) x = x.getElementsByTagName("div");
-        if (e.keyCode == 40) {
-            currentFocus += 2;
+        
+        if (e.keyCode == 40) { // Abajo
+            currentFocus++;
             addActive(x);
-        } else if (e.keyCode == 38) {
-            currentFocus -= 2;
+        } else if (e.keyCode == 38) { // Arriba
+            currentFocus--;
             addActive(x);
-        } else if (e.keyCode == 13) {
+        } else if (e.keyCode == 13) { // Enter
             e.preventDefault();
             if (currentFocus > -1) {
+                // Si se usaron flechas, seleccionar el activo
                 if (x) x[currentFocus].click();
+            } else if (x && x.length > 0) {
+                // NUEVO: Si no se usaron flechas, seleccionar el PRIMERO de la lista automáticamente
+                x[0].click();
             }
         }
     });

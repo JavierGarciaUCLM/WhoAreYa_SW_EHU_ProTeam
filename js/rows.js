@@ -13,29 +13,34 @@ const attribs = ['nationality', 'leagueId', 'teamId', 'position', 'birthdate']
 let setupRows = function (game) {
 
     let [state, updateState] = initState('WAYgameState', game.solution.id);
-    //game.guesses = state.guesses.slice();
+   // game.guesses = state.guesses.slice();
 
-    // Configuración del botón de estadísticas (Para abrirlo manualmente)
+    // -------------------------------------------------------------------
+    // Lógica del botón de estadísticas (Abrir/Cerrar)
+    // -------------------------------------------------------------------
     function setupStatsButton() {
         const btn = document.getElementById("statsIcon");
         if (btn) {
             btn.style.cursor = "pointer";
             btn.onclick = function() {
-                showStats(0);
+                // Comprobamos si ya existe el modal en el HTML
+                const existingModal = document.getElementById("statsModal");
+                
+                if (existingModal) {
+                    // Si existe, lo cerramos
+                    closeStatsModal();
+                } else {
+                    // Si no existe, lo abrimos
+                    showStats(0);
+                }
             };
         }
     }
-    setupStatsButton();
-
+    setupStatsButton(); // Se ejecuta al cargar
+    // -------------------------------------------------------------------
 
     function leagueToFlag(leagueId) {
-        const leagueMap = {
-            564: "es1",
-            8:   "en1",
-            82:  "de1",
-            384: "it1",
-            301: "fr1"
-        };
+        const leagueMap = { 564: "es1", 8: "en1", 82: "de1", 384: "it1", 301: "fr1" };
         return leagueMap[leagueId] ?? "unknown";
     }
 
@@ -74,12 +79,16 @@ let setupRows = function (game) {
                     color =  "bg-rose-500"
                     text = "The player was " + game.solution.name
                 }
-                document.getElementById("picbox").innerHTML += `<div class="animate-pulse fixed z-20 top-14 left-1/2 transform -translate-x-1/2 max-w-sm shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${color} text-white"><div class="p-4"><p class="text-sm text-center font-medium">${text}</p></div></div>`
+                // Evitamos duplicar el cartel de resultado si ya salió
+                if (!document.getElementById("result-banner")) {
+                    document.getElementById("picbox").innerHTML += `<div id="result-banner" class="animate-pulse fixed z-20 top-14 left-1/2 transform -translate-x-1/2 max-w-sm shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${color} text-white"><div class="p-4"><p class="text-sm text-center font-medium">${text}</p></div></div>`;
+                }
                 resolve();
             }, 2000)
         })
     }
 
+    // Función para cerrar el modal (se usa en el botón X, el fondo y el botón de la navbar)
     function closeStatsModal() {
         const modal = document.getElementById("statsModal");
         if (modal) modal.remove();
@@ -88,11 +97,16 @@ let setupRows = function (game) {
     function showStats(timeout) {
         return new Promise( (resolve, reject) =>  {
             setTimeout(() => {
+                // Si ya está abierto, no hacemos nada (para evitar dobles)
+                if (document.getElementById("statsModal")) return;
+
                 document.body.appendChild(stringToHTML(stats()));
                 
+                // Conectar botón X del modal
                 const closeBtn = document.getElementById("closeStatsBtn");
                 if (closeBtn) closeBtn.onclick = closeStatsModal;
 
+                // Conectar clic en el fondo oscuro
                 bindClose();
                 resolve();
             }, timeout)
@@ -103,7 +117,6 @@ let setupRows = function (game) {
         const backdrop = document.getElementById("closedialog");
         if (backdrop) backdrop.onclick = closeStatsModal;
     }
-
 
     function setContent(guess) {
         return [
@@ -138,7 +151,6 @@ let setupRows = function (game) {
         playersNode.prepend(stringToHTML(child))
     }
 
-
     function resetInput(){
         const input = document.getElementById("myInput");
         if (!input) return;
@@ -153,7 +165,6 @@ let setupRows = function (game) {
         return game.players.find(p => p.id === playerId);
     }
 
-
     function gameEnded(lastGuess){
         const hasGuessed = lastGuess === game.solution.id;
         const outOfTries = game.guesses.length >= 8;
@@ -162,8 +173,8 @@ let setupRows = function (game) {
 
     resetInput();
 
-    return /* addRow */ function (playerId) {
-
+    // Retornamos la función principal que se llama cada vez que el usuario elige un jugador
+    return function (playerId) {
         let guess = getPlayer(playerId)
         let content = setContent(guess)
 
@@ -186,19 +197,12 @@ let setupRows = function (game) {
                 updateStats(false); 
                 gameOver();
             }
-        
-            // -------------------------------------------------
-            // HE QUITADO LA SIGUIENTE LÍNEA PARA QUE NO SALTE AUTOMÁTICAMENTE:
-            // showStats(2500);
-            // -------------------------------------------------
+            
+            // AQUÍ YA NO LLAMAMOS A showStats() AUTOMÁTICAMENTE
+            // Solo se abrirá si el usuario pulsa el botón.
         }
     }
 
-    function success() {
-        unblur('success');
-    }
-    
-    function gameOver() {
-        unblur('fail');
-    }
+    function success() { unblur('success'); }
+    function gameOver() { unblur('fail'); }
 }
