@@ -44,7 +44,7 @@ function autocomplete(inp, game) {
                 // Ahora ponemos value='${players[i].name}'.
                 
                 b.innerHTML += `<div class='self-center'>
-                                    <span class='font-bold'>${players[i].name}</span>
+                                    <span class='font-bold'>${players[i].name.substr(0,val.length)}</span><span>${players[i].name.substr(val.length)}</span>
                                     <input type='hidden' name='name' value='${players[i].name}'>
                                     <input type='hidden' name='id' value='${players[i].id}'>
                                 </div>`;
