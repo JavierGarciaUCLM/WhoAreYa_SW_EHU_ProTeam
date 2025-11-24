@@ -52,7 +52,7 @@ let setupRows = function (game) {
         if (!hasBirthdayPassed) age--;
         return age;
     }
-    
+
     let check = function (theKey, theValue) {
         const target = game.solution;
         if (theKey === "birthdate") {
@@ -76,8 +76,8 @@ let setupRows = function (game) {
                     color =  "bg-blue-500"
                     text = "Awesome"
                 } else {
-                    color =  "bg-rose-500"
-                    text = "The player was " + game.solution.name
+                    color = "bg-rose-500";
+                    text = "The player was " + game.solution.name;
                 }
                 // Evitamos duplicar el cartel de resultado si ya salió
                 if (!document.getElementById("result-banner")) {
@@ -95,7 +95,7 @@ let setupRows = function (game) {
     }
 
     function showStats(timeout) {
-        return new Promise( (resolve, reject) =>  {
+        return new Promise((resolve, reject) => {
             setTimeout(() => {
                 // Si ya está abierto, no hacemos nada (para evitar dobles)
                 if (document.getElementById("statsModal")) return;
@@ -109,8 +109,8 @@ let setupRows = function (game) {
                 // Conectar clic en el fondo oscuro
                 bindClose();
                 resolve();
-            }, timeout)
-        })
+            }, timeout);
+        });
     }
 
     function bindClose() {
@@ -129,7 +129,7 @@ let setupRows = function (game) {
     }
 
     function showContent(content, guess) {
-        let fragments = '', s = '';
+        let fragments = '';
         for (let j = 0; j < content.length; j++) {
             s = "".concat(((j + 1) * delay).toString(), "ms")
             fragments += `<div class="w-1/5 shrink-0 flex justify-center ">
@@ -139,16 +139,18 @@ let setupRows = function (game) {
                           </div>`
         }
 
-        let child = `<div class="flex w-full flex-wrap text-l py-2">
-                        <div class=" w-full grow text-center pb-2">
-                            <div class="mx-1 overflow-hidden h-full flex items-center justify-center sm:text-right px-4 uppercase font-bold text-lg opacity-0 fadeInDown " style="animation-delay: 0ms;">
-                                ${guess.name}
-                            </div>
-                        </div>
-                        ${fragments}`
+        let child = `
+        <div class="flex w-full flex-wrap text-l py-2">
+            <div class="w-full grow text-center pb-2">
+                <div class="mx-1 overflow-hidden h-full flex items-center justify-center sm:text-right px-4 uppercase font-bold text-lg opacity-0 fadeInDown" style="animation-delay: 0ms;">
+                    ${guess.name}
+                </div>
+            </div>
+            ${fragments}
+        </div>`;
 
-        let playersNode = document.getElementById('players')
-        playersNode.prepend(stringToHTML(child))
+        let playersNode = document.getElementById('players');
+        playersNode.prepend(stringToHTML(child));
     }
 
     function resetInput(){
@@ -189,7 +191,8 @@ let setupRows = function (game) {
                 input.disabled = true;
                 input.placeholder = "Game Over";
             }
-        
+
+            // Lógica de Estadísticas (Milestone 5)
             if (playerId == game.solution.id) {
                 updateStats(game.guesses.length); 
                 success();

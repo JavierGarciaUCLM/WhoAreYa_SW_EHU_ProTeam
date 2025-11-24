@@ -8,4 +8,3 @@ export function stringToHTML(str) {
     template.innerHTML = str.trim();
     return template.content.firstElementChild;
   }
- 
