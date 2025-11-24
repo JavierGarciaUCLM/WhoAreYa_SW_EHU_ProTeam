@@ -1,6 +1,6 @@
 import { setupRows } from "./rows.js";
 
-export { autocomplete }
+export { autocomplete };
 
 function autocomplete(inp, game) {
 
@@ -25,11 +25,11 @@ function autocomplete(inp, game) {
             let matchFound = false;
             
             if (window.WAY && typeof window.WAY.match === 'function') {
-                 const matches = window.WAY.match(players[i].name, val, { insideWords: true, findAllOccurrences: true });
-                 matchFound = (matches && matches.length > 0);
+                const matches = window.WAY.match(players[i].name, val, { insideWords: true, findAllOccurrences: true });
+                matchFound = (matches && matches.length > 0);
             } else {
-                 // Fallback simple por si WAY.match falla
-                 matchFound = players[i].name.toUpperCase().includes(val.toUpperCase());
+                // Fallback simple por si WAY.match falla
+                matchFound = players[i].name.toUpperCase().includes(val.toUpperCase());
             }
 
             if (matchFound) {
@@ -38,10 +38,6 @@ function autocomplete(inp, game) {
                 
                 // Imagen del equipo
                 b.innerHTML = `<img src="https://cdn.sportmonks.com/images/soccer/teams/${players[i].teamId % 32}/${players[i].teamId}.png" width="28" height="28">`;
-
-                // --- CORRECCIÓN CRÍTICA AQUÍ ABAJO ---
-                // Antes ponías value='${name}', lo cual daba error porque 'name' no existe.
-                // Ahora ponemos value='${players[i].name}'.
                 
                 b.innerHTML += `<div class='self-center'>
                                     <span class='font-bold'>${players[i].name.substr(0,val.length)}</span><span>${players[i].name.substr(val.length)}</span>
