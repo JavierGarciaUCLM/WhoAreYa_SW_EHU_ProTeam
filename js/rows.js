@@ -1,30 +1,46 @@
 import { stringToHTML } from "./fragments.js";
-// Importamos updateStats para guardar datos y stats para obtener el HTML visual
 import { initState, updateStats, stats } from "./stats.js";
 
 export { setupRows };
 
-// Utility para formatear números si fuera necesario
-function pad(a, b) {
-    return (1e15 + a + '').slice(-b);
+function pad(a, b){
+    return(1e15 + a + '').slice(-b);
 }
 
 const delay = 350;
-const attribs = ['nationality', 'leagueId', 'teamId', 'position', 'birthdate'];
+const attribs = ['nationality', 'leagueId', 'teamId', 'position', 'birthdate']
 
 let setupRows = function (game) {
 
     let [state, updateState] = initState('WAYgameState', game.solution.id);
-    //game.guesses = state.guesses.slice(); // Sincronizar intentos previos si hay recarga
+   // game.guesses = state.guesses.slice();
+
+    // -------------------------------------------------------------------
+    // Lógica del botón de estadísticas (Abrir/Cerrar)
+    // -------------------------------------------------------------------
+    function setupStatsButton() {
+        const btn = document.getElementById("statsIcon");
+        if (btn) {
+            btn.style.cursor = "pointer";
+            btn.onclick = function() {
+                // Comprobamos si ya existe el modal en el HTML
+                const existingModal = document.getElementById("statsModal");
+                
+                if (existingModal) {
+                    // Si existe, lo cerramos
+                    closeStatsModal();
+                } else {
+                    // Si no existe, lo abrimos
+                    showStats(0);
+                }
+            };
+        }
+    }
+    setupStatsButton(); // Se ejecuta al cargar
+    // -------------------------------------------------------------------
 
     function leagueToFlag(leagueId) {
-        const leagueMap = {
-            564: "es1", // La Liga
-            8:   "en1", // Premier League
-            82:  "de1", // Bundesliga
-            384: "it1", // Serie A
-            301: "fr1"  // Ligue 1
-        };
+        const leagueMap = { 564: "es1", 8: "en1", 82: "de1", 384: "it1", 301: "fr1" };
         return leagueMap[leagueId] ?? "unknown";
     }
 
@@ -32,76 +48,65 @@ let setupRows = function (game) {
         const birth = new Date(dateString);
         const today = new Date();
         let age = today.getFullYear() - birth.getFullYear();
-        const hasBirthdayPassed = today.getMonth() > birth.getMonth() || 
-                                  (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
-        
+        const hasBirthdayPassed = today.getMonth() > birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
         if (!hasBirthdayPassed) age--;
         return age;
     }
 
     let check = function (theKey, theValue) {
         const target = game.solution;
-
         if (theKey === "birthdate") {
             const guessedAge = getAge(theValue);
-            const targetAge = getAge(target.birthdate);
-            
+            const targetAge  = getAge(target.birthdate);
             if (guessedAge === targetAge) return "correct";
-            // Si la edad adivinada es menor, la correcta es "higher" (mayor)
             return guessedAge < targetAge ? "higher" : "lower";
         }
-
         return target[theKey] === theValue ? "correct" : "incorrect";
     };
 
     function unblur(outcome) {
-        return new Promise((resolve, reject) => {
+        return new Promise( (resolve, reject) =>  {
             setTimeout(() => {
-                document.getElementById("mistery").classList.remove("hue-rotate-180", "blur");
-                
-                // Quitamos la caja de búsqueda para que no moleste
-                const combobox = document.getElementById("combobox");
-                if(combobox) combobox.style.display = 'none';
+                document.getElementById("mistery").classList.remove("hue-rotate-180", "blur")
+                const combo = document.getElementById("combobox");
+                if(combo) combo.style.display = 'none'; 
 
-                let color, text;
-                if (outcome == 'success') {
-                    color = "bg-blue-500";
-                    text = "Awesome";
+                let color, text
+                if (outcome=='success'){
+                    color =  "bg-blue-500"
+                    text = "Awesome"
                 } else {
                     color = "bg-rose-500";
                     text = "The player was " + game.solution.name;
                 }
-
-                document.getElementById("picbox").innerHTML += `
-                    <div class="animate-pulse fixed z-20 top-14 left-1/2 transform -translate-x-1/2 max-w-sm shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${color} text-white">
-                        <div class="p-4">
-                            <p class="text-sm text-center font-medium">${text}</p>
-                        </div>
-                    </div>`;
+                // Evitamos duplicar el cartel de resultado si ya salió
+                if (!document.getElementById("result-banner")) {
+                    document.getElementById("picbox").innerHTML += `<div id="result-banner" class="animate-pulse fixed z-20 top-14 left-1/2 transform -translate-x-1/2 max-w-sm shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${color} text-white"><div class="p-4"><p class="text-sm text-center font-medium">${text}</p></div></div>`;
+                }
                 resolve();
-            }, 2000);
-        });
+            }, 2000)
+        })
     }
 
-    function closeModal() {
+    // Función para cerrar el modal (se usa en el botón X, el fondo y el botón de la navbar)
+    function closeStatsModal() {
         const modal = document.getElementById("statsModal");
         if (modal) modal.remove();
-        // Aseguramos que la imagen sigue visible
-        document.getElementById("mistery").classList.remove("hue-rotate-180", "blur");
     }
 
     function showStats(timeout) {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                // Generamos el HTML de las estadísticas llamando a la función importada
-                const statsHTML = stats();
-                document.body.appendChild(stringToHTML(statsHTML));
+                // Si ya está abierto, no hacemos nada (para evitar dobles)
+                if (document.getElementById("statsModal")) return;
 
-                // Vinculamos el botón de cerrar 'X' del modal generado
-                const closeBtn = document.getElementById("showHide");
-                if (closeBtn) closeBtn.onclick = closeModal;
+                document.body.appendChild(stringToHTML(stats()));
+                
+                // Conectar botón X del modal
+                const closeBtn = document.getElementById("closeStatsBtn");
+                if (closeBtn) closeBtn.onclick = closeStatsModal;
 
-                // Vinculamos el click en el fondo oscuro
+                // Conectar clic en el fondo oscuro
                 bindClose();
                 resolve();
             }, timeout);
@@ -110,9 +115,7 @@ let setupRows = function (game) {
 
     function bindClose() {
         const backdrop = document.getElementById("closedialog");
-        if (backdrop) {
-            backdrop.onclick = closeModal;
-        }
+        if (backdrop) backdrop.onclick = closeStatsModal;
     }
 
     function setContent(guess) {
@@ -122,22 +125,18 @@ let setupRows = function (game) {
             `<img src="https://cdn.sportmonks.com/images/soccer/teams/${guess.teamId % 32}/${guess.teamId}.png" alt="" style="width: 60%;">`,
             `${guess.position}`,
             `${getAge(guess.birthdate)}`
-        ];
+        ]
     }
 
     function showContent(content, guess) {
         let fragments = '';
         for (let j = 0; j < content.length; j++) {
-            let s = ((j + 1) * delay).toString() + "ms";
-            // Lógica para flechas de edad (opcional visualmente, aquí se añade clase 'higher'/'lower' si la tuvieras en CSS, o se deja base)
-            // Nota: La lógica de color ya la tienes integrada abajo
-            
-            fragments += `
-            <div class="w-1/5 shrink-0 flex justify-center">
-                <div class="mx-1 overflow-hidden w-full max-w-2 shadowed font-bold text-xl flex aspect-square rounded-full justify-center items-center bg-slate-400 text-white ${check(attribs[j], guess[attribs[j]]) == 'correct' ? 'bg-green-500' : ''} opacity-0 fadeInDown" style="max-width: 60px; animation-delay: ${s};">
-                    ${content[j]}
-                </div>
-            </div>`;
+            s = "".concat(((j + 1) * delay).toString(), "ms")
+            fragments += `<div class="w-1/5 shrink-0 flex justify-center ">
+                            <div class="mx-1 overflow-hidden w-full max-w-2 shadowed font-bold text-xl flex aspect-square rounded-full justify-center items-center bg-slate-400 text-white ${check(attribs[j], guess[attribs[j]]) == 'correct' ? 'bg-green-500' : ''} opacity-0 fadeInDown" style="max-width: 60px; animation-delay: ${s};">
+                                ${content[j]}
+                            </div>
+                          </div>`
         }
 
         let child = `
@@ -154,45 +153,37 @@ let setupRows = function (game) {
         playersNode.prepend(stringToHTML(child));
     }
 
-    function resetInput() {
+    function resetInput(){
         const input = document.getElementById("myInput");
         if (!input) return;
-        
         let attempt = game.guesses.length + 1;
-        // Si ya terminó el juego visualmente, no mostramos "Intento 9 de 8"
-        if (attempt > 8) attempt = 8; 
-        
+        if (attempt > 8) attempt = 8;
         input.value = "";
         input.placeholder = `Intento ${attempt} de 8`;
-        input.disabled = false;
         input.focus();
     }
 
     let getPlayer = function (playerId) {
         return game.players.find(p => p.id === playerId);
-    };
+    }
 
-    function gameEnded(lastGuess) {
+    function gameEnded(lastGuess){
         const hasGuessed = lastGuess === game.solution.id;
         const outOfTries = game.guesses.length >= 8;
         return hasGuessed || outOfTries;
     }
 
-    // Inicializamos input al cargar
     resetInput();
 
-    // --- Función principal que retorna setupRows ---
+    // Retornamos la función principal que se llama cada vez que el usuario elige un jugador
     return function (playerId) {
-        let guess = getPlayer(playerId);
-        // console.log(guess); // Debug
+        let guess = getPlayer(playerId)
+        let content = setContent(guess)
 
-        let content = setContent(guess);
-
-        game.guesses.push(playerId);
-        updateState(playerId);
-
-        showContent(content, guess); // Mostramos la fila visualmente
-        resetInput(); // Reseteamos el input para el siguiente intento
+        game.guesses.push(playerId)
+        updateState(playerId)
+        showContent(content, guess)
+        resetInput();
 
         if (gameEnded(playerId)) {
             const input = document.getElementById("myInput");
@@ -203,25 +194,18 @@ let setupRows = function (game) {
 
             // Lógica de Estadísticas (Milestone 5)
             if (playerId == game.solution.id) {
-                // VICTORIA: Pasamos el número de intentos (length actual)
-                updateStats(game.guesses.length);
+                updateStats(game.guesses.length); 
                 success();
-            } else {
-                // DERROTA
-                updateStats(false);
+            } else if (game.guesses.length == 8) {
+                updateStats(false); 
                 gameOver();
             }
-
-            // Mostramos las estadísticas tras esperar la animación de unblur
-            showStats(2500);
+            
+            // AQUÍ YA NO LLAMAMOS A showStats() AUTOMÁTICAMENTE
+            // Solo se abrirá si el usuario pulsa el botón.
         }
-    };
-
-    function success() {
-        unblur('success');
     }
 
-    function gameOver() {
-        unblur('fail');
-    }
-};
+    function success() { unblur('success'); }
+    function gameOver() { unblur('fail'); }
+}
